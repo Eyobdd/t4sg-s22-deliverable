@@ -5,10 +5,12 @@ import Grid, { GridSpacing } from "@material-ui/core/Grid";
 import "../../styles/casemanagement.module.css";
 import Footer from "./Footer";
 import CaseCategory from "./CaseCategory";
+import DeleteCategoryModal from "./Modals/DeleteCategoryModal";
 import AddCaseModal from "./Modals/AddCaseModal";
 import { useQuery } from "urql";
 import AddCategoryModal from "./Modals/AddCategoryModal";
 import AddTagModal from "./Modals/AddTagModal";
+import { Autorenew, Category } from "@material-ui/icons";
 
 /* 
   FEATURE 1 TODO:
@@ -21,7 +23,10 @@ import AddTagModal from "./Modals/AddTagModal";
 */
 export const ManagementContainerQuery = `
 query MyQuery {
-  __typename 
+  category {
+    id
+    name
+  }
 }
 `;
 // END TODO
@@ -36,6 +41,8 @@ const CaseManagementContainer: React.FC = (props) => {
     React.useState<boolean>(false);
   const [addCategoryModalOpen, setAddCategoryModalOpen] =
     React.useState<boolean>(false);
+  const [deleteCategoryModalOpen, setDeleteCategoryModalOpen] =
+    React.useState<boolean>(false);
   const [addTagModalOpen, setAddTagModalOpen] = React.useState<boolean>(false);
 
   /* NOTE: This uses */
@@ -43,19 +50,11 @@ const CaseManagementContainer: React.FC = (props) => {
     query: ManagementContainerQuery,
   });
 
+  const category: ManagementCategory[] | null = data ? data?.category: null;
+
   return (
     <>
       <h5 className="title">Home Page</h5>
-      <Grid container spacing={3}>
-        {/*
-          FEATURE 1 TODO:
-          Use the data from the result of the query to render 
-          a CaseCategory for every category in the response.
-          Remember, the response is stored in the "data" variable!
-        */}
-
-        {/* END TODO */}
-      </Grid>
 
       <AddCaseModal
         onClose={() => setAddCaseModalOpen(false)}
@@ -65,6 +64,11 @@ const CaseManagementContainer: React.FC = (props) => {
       <AddCategoryModal
         onClose={() => setAddCategoryModalOpen(false)}
         open={addCategoryModalOpen}
+      />
+
+      <DeleteCategoryModal
+        onClose={() => setDeleteCategoryModalOpen(false)}
+        open={deleteCategoryModalOpen}
       />
 
       <AddTagModal
@@ -83,6 +87,9 @@ const CaseManagementContainer: React.FC = (props) => {
         <Button variant="dark" onClick={() => setAddCategoryModalOpen(true)}>
           Add Category
         </Button>
+        <Button variant="dark" onClick={() => setDeleteCategoryModalOpen(true)}>
+          Delete Category
+        </Button>
         <Button variant="dark" onClick={() => setAddTagModalOpen(true)}>
           Add Tag To A Case
         </Button>
@@ -96,6 +103,24 @@ const CaseManagementContainer: React.FC = (props) => {
           Edit Case
         </Button>
       </Container>
+
+      <Grid container spacing={3}>
+         {/*
+          FEATURE 1 TODO:
+          Use the data from the result of the query to render 
+          a CaseCategory for every category in the response.
+          Remember, the response is stored in the "data" variable!
+        */}
+        {category
+            ? category.map((value: ManagementCategory, index: number) => {
+                return <Grid key={index} item xs={4}>
+                  <CaseCategory category_id={value.id}/>
+                  </Grid>;
+              })
+            : "Something went wrong"}
+
+        {/* END TODO */}
+      </Grid>
     </>
   );
 };
